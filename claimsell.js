@@ -79,7 +79,7 @@ P.forEach(element => {
             } else{
 
                                                         claimer()
-             // }
+              }
                                                 } catch (err){
                                                         console.log(`Didn't sell/claim/approve any Furio (${err.message}, ${shortId(wallet.address)})`)
 //                                                              return
