@@ -10,3 +10,4 @@ In light of all the BS with terrible way that the project is managed, this bot w
 
 More details here: https://core.telegram.org/bots/tutorial
 
+- There is an approve function, this is commented out as you can approve a large amount manually and then not need the additional step(cheaper to do it once).
