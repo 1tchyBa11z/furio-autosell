@@ -64,62 +64,60 @@ const approveContract = new web3.eth.Contract(IERC20ABI, tokenAddress);
 var gasPrice = 2000000000;
 // Loop through private keys
 P.forEach(element => {
-                        let currently_compounding = false
-                        let currently_approved= false
-      var wallet = web3.eth.accounts.wallet.add(P[i]);
+    let currently_compounding = false
+    let currently_approved= false
+    var wallet = web3.eth.accounts.wallet.add(P[i]);
 
-                                //              console.log(wallet);
-                                async function checkRollAvailability(){
+    //              console.log(wallet);
+    async function checkRollAvailability(){
         var cooldown = await swapContract.methods.onCooldown(wallet.address).call()
-                                        if(currently_compounding) return
-                                                try {
+        if(currently_compounding) return
+            try {
 //                                              console.log("[*] On cooldown :", cooldown)
-                                                if (cooldown){
-            console.log("[*] On cooldown!");
-            } else{
+                if (cooldown){
+                    console.log("[*] On cooldown!");
+                    } else {
 
-                                                        claimer()
-              }
-                                                } catch (err){
-                                                        console.log(`Didn't sell/claim/approve any Furio (${err.message}, ${shortId(wallet.address)})`)
+                         claimer()
+                    }
+            } catch (err){
+                console.log(`Didn't sell/claim/approve any Furio (${err.message}, ${shortId(wallet.address)})`)
 //                                                              return
-                                                }
-                                }
+            }
+        }
 
-                        async function claimer(){
-                                try{
-          const participantBalance = await contract.methods.participantBalance(wallet.address).call()
-          const rewardRate = await contract.methods.rewardRate(wallet.address).call()
-          const availableRewards = await contract.methods.availableRewards(wallet.address).call()
-          var balance = await approveContract.methods.balanceOf(wallet.address).call() 
-          //          var gasPrice = await web3.eth.getGasPrice() 
-          var block = await web3.eth.getBlock("latest")
-          var gasLimit = math.floor(block.gasLimit/block.transactions.length);
-          var dailySum = (( participantBalance *rewardRate)/10000)-1e16
+    async function claimer(){
+        try{
+            const participantBalance = await contract.methods.participantBalance(wallet.address).call()
+            const rewardRate = await contract.methods.rewardRate(wallet.address).call()
+            const availableRewards = await contract.methods.availableRewards(wallet.address).call()
+            var balance = await approveContract.methods.balanceOf(wallet.address).call() 
+            //          var gasPrice = await web3.eth.getGasPrice() 
+            var block = await web3.eth.getBlock("latest")
+            var gasLimit = math.floor(block.gasLimit/block.transactions.length);
+            var dailySum = (( participantBalance *rewardRate)/10000)-1e16
 
 
 
-                                        // compound daily rate of rewards for once daily
-                                        if (availableRewards >= dailySum) {
+            // compound daily rate of rewards for once daily
+            if (availableRewards >= dailySum) {
             setTimeout(() => {  console.log("Starting Claimer ..."); }, 5000);
 
-                                                        // console.log("availableRewards are larger or equal to dailySum")
-                                                        console.log(`Claim: ${web3.utils.fromWei(availableRewards.toString(),'ether')} FUR!, ${shortId(wallet.address)}`)
-                                                        const claim = await contract.methods.claim().send(
-                                                                        {
+                // console.log("availableRewards are larger or equal to dailySum")
+                console.log(`Claim: ${web3.utils.fromWei(availableRewards.toString(),'ether')} FUR!, ${shortId(wallet.address)}`)
+                const claim = await contract.methods.claim().send(
+                {
                 from: wallet.address,
                 gas: gasLimit,
                 gasPrice: gasPrice
                 }
                 );
-                                                        console.log(`Claim status: ${claim.status}, ${shortId(wallet.address)}`);
-              sendMessage(botChat, `Claim: ${claim.status}, ${shortId(wallet.address)}, ${web3.utils.fromWei(balance)} FUR`); // only use if using your own telegram bot
-                                                        currently_compounding = true;
+                console.log(`Claim status: ${claim.status}, ${shortId(wallet.address)}`);
+                sendMessage(botChat, `Claim: ${claim.status}, ${shortId(wallet.address)}, ${web3.utils.fromWei(balance)} FUR`); // only use if using your own telegram bot
+                currently_compounding = true;
                                                         // console.log(`gas Price: ${gasPrice}`)
-              seller()
-          }
-
-
+                seller()
+            }
 
         } catch (err){
           currently_compounding = false;
@@ -127,13 +125,13 @@ P.forEach(element => {
             return
         }
         currently_compounding = false
-      }
-      //selling function                                                                                                                    
-      async function seller(){                            
-       //var gasPrice = await web3.eth.getGasPrice() ;        
-        var block = await web3.eth.getBlock("latest");                                                                                      
-        var gasLimit = math.floor(block.gasLimit/block.transactions.length);
-        var balance = await approveContract.methods.balanceOf(wallet.address).call(); 
+    }
+    //selling function                                                                                                                    
+    async function seller(){                            
+    //var gasPrice = await web3.eth.getGasPrice() ;        
+    var block = await web3.eth.getBlock("latest");                                                                                      
+    var gasLimit = math.floor(block.gasLimit/block.transactions.length);
+    var balance = await approveContract.methods.balanceOf(wallet.address).call(); 
 //        console.log("GasPrice: ", gasPrice);                                                                                                
 //        console.log("GasLimit: ", gasLimit);                     
                                                                       
@@ -177,45 +175,45 @@ P.forEach(element => {
           //      console.log(`Failed sell  ${err.status} `);
         }
       }
-      //approve function  - only necessary if you haven't pre approved, which I recommend as it saves gas and you can approve more than 1 sells worth of FUR
+//approve function  - only necessary if you haven't pre approved, which I recommend as it saves gas and you can approve more than 1 sells worth of FUR
 /*      async function approve() {
 
 //        var gasPrice = await web3.eth.getGasPrice()  ;
-        var gasPrice = 4000000000;
-        var block = await web3.eth.getBlock("latest");
-        var gasLimit = math.floor(block.gasLimit/block.transactions.length);
-        const balance = await approveContract.methods.balanceOf(wallet.address).call(); 
+var gasPrice = 4000000000;
+var block = await web3.eth.getBlock("latest");
+var gasLimit = math.floor(block.gasLimit/block.transactions.length);
+const balance = await approveContract.methods.balanceOf(wallet.address).call(); 
 
-        try {
-                                        console.log(`Checking balance: ${shortId(wallet.address)}, ${web3.utils.fromWei(balance)}`);
-                                        if (balance >= 1e18) {
+try {
+    console.log(`Checking balance: ${shortId(wallet.address)}, ${web3.utils.fromWei(balance)}`);
+    if (balance >= 1e18) {
 
-                                                var cooldown = await swapContract.methods.onCooldown(wallet.address).call();
-                                                console.log("[*] On cooldown :", cooldown);
-                                                if (cooldown){
-                                                        console.log("[*] Come back later pleb");
-                                                } else {
-                                                        console.log("Start Approval");
-                                                        const approve = await approveContract.methods.approve(Swap_Contract, balance).send(
-                                                                        {
-                                                                                from: wallet.address, 
-                                            gas: gasLimit,
-                                            gasprice: gasPrice
-                                                                        }
-                              )
+        var cooldown = await swapContract.methods.onCooldown(wallet.address).call();
+        console.log("[*] On cooldown :", cooldown);
+        if (cooldown){
+                console.log("[*] Come back later pleb");
+        } else {
+                console.log("Start Approval");
+                const approve = await approveContract.methods.approve(Swap_Contract, balance).send(
+                {
+                    from: wallet.address, 
+                    gas: gasLimit,
+                    gasprice: gasPrice
+                }
+                )
 
-                                                        setTimeout(() => 10000);
-                                                        seller();
-                                                }
-                                        }
-  } catch (err){
-  //                                    console.log(`Failed sell  ${err.status}, ${err.message}, ${balance}, ${shortId(wallet.address)}`);
-  console.log(`Failed approve ${err.message} `);
-  }
+                setTimeout(() => 10000);
+                seller();
+            }
+    }
+} catch (err){
+//    console.log(`Failed sell  ${err.status}, ${err.message}, ${balance}, ${shortId(wallet.address)}`);
+console.log(`Failed approve ${err.message} `);
+}
 }
 */
 
-  checkRollAvailability()
+checkRollAvailability()
 setInterval(async () => { await checkRollAvailability() }, POLLING_INTERVAL)
   i++
   });
